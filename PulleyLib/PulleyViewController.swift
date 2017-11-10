@@ -201,7 +201,10 @@ open class PulleyViewController: UIViewController {
             }
         }
     }
-    
+
+    /// Allow background opacity for partially reveal mode
+  public var dimmingBackgroundForPartiallyRevealMode: Bool = false
+
     /// The inset from the top of the view controller when fully open.
     @IBInspectable public var topInset: CGFloat = 50.0 {
         didSet {
@@ -688,7 +691,8 @@ extension PulleyViewController: PulleyPassthroughScrollViewDelegate {
     
     func viewToReceiveTouch(scrollView: PulleyPassthroughScrollView) -> UIView
     {
-        if drawerPosition == .open
+        if drawerPosition == .open ||
+          (dimmingBackgroundForPartiallyRevealMode && drawerPosition == .partiallyRevealed)
         {
             return backgroundDimmingView
         }
@@ -827,7 +831,12 @@ extension PulleyViewController: UIScrollViewDelegate {
                     backgroundDimmingView.isUserInteractionEnabled = false
                 }
             }
-            
+
+            if dimmingBackgroundForPartiallyRevealMode && drawerPosition == .partiallyRevealed {
+              backgroundDimmingView.alpha = backgroundDimmingOpacity
+              backgroundDimmingView.isUserInteractionEnabled = true
+            }
+
             delegate?.drawerChangedDistanceFromBottom?(drawer: self, distance: scrollView.contentOffset.y + lowestStop)
             (drawerContentViewController as? PulleyDrawerViewControllerDelegate)?.drawerChangedDistanceFromBottom?(drawer: self, distance: scrollView.contentOffset.y + lowestStop)
             (primaryContentViewController as? PulleyPrimaryContentControllerDelegate)?.drawerChangedDistanceFromBottom?(drawer: self, distance: scrollView.contentOffset.y + lowestStop)
